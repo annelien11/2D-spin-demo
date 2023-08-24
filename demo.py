@@ -10,8 +10,8 @@ import ising
 import potts
 import xy
 
-import squares as sq
-import triangles as tri
+from triangle import Triangle
+from square import Square
 
 import metropolis
 import heatbath
@@ -81,11 +81,11 @@ class App:
     def __init__(self):
         self.params = dict()
         self.simulation_running = False
-        self.shape = sq
+        self.shape = Square()
         self.model = ising
         self.algorithm = metropolis
         self.bc = empty
-        self.resolution = self.shape.get_resolution()
+        self.resolution = self.shape.resolution
         self.plot = False
         self.popup = True
         self.Npotts = None
@@ -243,9 +243,9 @@ class App:
                 self.popup = True
 
                 if values['Shape'] == 'Square':
-                    self.shape = sq
+                    self.shape = Square()
                 else:
-                    self.shape = tri
+                    self.shape = Triangle()
 
             elif event == 'Model':
                 if self.simulation_running:
