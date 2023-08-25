@@ -6,24 +6,24 @@ from threading import Thread
 import random
 from matplotlib import pyplot as plt
 
-import ising
-import potts
-import xy
+from ising import Ising
+from potts import Potts
+from xy import XY
 
 from triangle import Triangle
 from square import Square
 
-import metropolis
-import heatbath
-import wolff
+from metropolis import Metropolis
+from heatbath import Heatbath
+from wolff import Wolff
 
-import empty
-import periodic
-import fixed
+from empty import Empty
+from periodic import Periodic
+from fixed import Fixed
 
-##################################################################################################
-# This part creates the window showing the dropdown menus, the sliders, the play button and the demo itself
-##################################################################################################
+
+
+
 def create_window(sliders):
     shapes = ['Square', 'Triangular']
     models = ['Ising', 'Potts', 'XY']
@@ -73,8 +73,6 @@ def create_window(sliders):
     return window
 
 
-##################################################################################################
-
 
 class App:
 
@@ -82,9 +80,9 @@ class App:
         self.params = dict()
         self.simulation_running = False
         self.shape = Square()
-        self.model = ising
-        self.algorithm = metropolis
-        self.bc = empty
+        self.model = Ising()
+        self.algorithm = Metropolis()
+        self.bc = Empty()
         self.resolution = self.shape.resolution
         self.plot = False
         self.popup = True
@@ -92,10 +90,6 @@ class App:
 
         self.init()
 
-    ##############################################################################################
-    # This part defines the different sliders, determines their ranges, initial values and resolution.
-    # It then stores the values of each slider in self.params
-    ##############################################################################################
     def init(self):
         sliders = [
             ('Steps                ', 1, 100, 1, 1),
@@ -109,10 +103,17 @@ class App:
         for slider in sliders:
             self.params[slider[0].strip()] = slider[4]
 
-    ##############################################################################################
+
+    def init_grid(self):
+        possible_spins = self.model.get_possible_spins(self.Npotts)
+        actual_dimension = self.shape.get_dimensions(self.gridsize)
+        init_array = []
+        for y in range(actual_dimension[0]):
+            init_array.append(random.choices(possible_spins, k=actual_dimension[1]))
+        return np.array(init_array)
+
 
     def compute_energies(self, spinposition, new_spin):
-
         h = self.params['Magnetic field (H)']
         J = self.params['Interaction (J)']
 
@@ -120,13 +121,9 @@ class App:
 
         spin = self.array[spinposition[0], spinposition[1]]
 
-        # nb_positions = self.shape.find_nb_positions(spinposition, self.gridsize)
         nb_positions = self.shape.find_nb_positions(spinposition)
 
         spin_neighbors = self.bc.get_neighbors(self.array, nb_positions, actual_dimensions)
-        # spin_neighbors = []
-        # for pos in nb_positions:
-        #     spin_neighbors.append(self.array[pos[0], pos[1]])
 
         initial_energy = self.model.energy_calculator(J, h, spin, spin_neighbors)
 
@@ -136,7 +133,6 @@ class App:
 
 
     def complete_lattice_energy(self):
-
         h = self.params['Magnetic field (H)']
         J = self.params['Interaction (J)']
 
@@ -146,11 +142,6 @@ class App:
             for x in range(actual_dimensions[1]):
                 spin = self.array[y, x]
 
-                # nb_positions = self.shape.find_nb_positions((y,x), self.gridsize)
-                # spin_neighbors = []
-                # for pos in nb_positions:
-                #     spin_neighbors.append(self.array[pos[0], pos[1]])
-
                 nb_positions = self.shape.find_nb_positions((y,x))
 
                 spin_neighbors = self.bc.get_neighbors(self.array, nb_positions, actual_dimensions)
@@ -159,17 +150,7 @@ class App:
         return energy
 
 
-    ##############################################################################################
-    # This is the important part!! Here you update the spin lattice according to the Metropolis algorithm.
-    # The simulation consists of three steps:
-    # (1) Choose a random lattice site
-    # (2) Compute the relevant part of the energy of this spin (only the part that changes if you flip)
-    # (3) Determine whether or not to flip the spin, and update the spin lattice
-    # If you turn on the slider "Steps", the simulation performs these three steps a number of times,
-    # and only returns the lattice after all those updates
-    ##############################################################################################
     def simulation(self):
-
         temperature = self.params['Temperature']
         J = self.params['Interaction (J)']
 
@@ -187,11 +168,7 @@ class App:
 
         return self.array
 
-    ##############################################################################################
 
-    ##############################################################################################
-    # This is the part that first performs simulation and then translates the lattice to a picture with colors
-    ##############################################################################################
     def simulation_thread(self):
         try:
             while self.simulation_running:
@@ -209,24 +186,13 @@ class App:
         except Exception as e:
             print(e)
 
-    ##############################################################################################
 
-    ##############################################################################################
-    # This part takes care of the interaction between you and the demo.
-    # It chooses which algorithms to use depending on your choices for the dropdown menus
-    # It creates a random grid when you press OK
-    # It updates the values for the sliders when you move them
-    # It starts and stops the demo when you press Play
-    ##############################################################################################
     def run(self):
 
         while True:
             event, values = self.window.read()
 
             if event == "Exit" or event == sg.WIN_CLOSED:
-                # if self.model == xy:
-                #     plt.quiver(np.cos(self.array), np.sin(self.array))
-                #     plt.show()
                 if self.plot:
                     plt.show()
                     plt.plot(self.en)
@@ -255,12 +221,12 @@ class App:
                 self.popup = True
 
                 if values['Model'] == 'Ising':
-                    self.model = ising
+                    self.model = Ising()
                 elif values['Model'] == 'Potts':
-                    self.model = potts
+                    self.model = Potts()
                     self.Npotts = int(sg.popup_get_text('Number of possible spins/colors:', title="Potts"))
                 else:
-                    self.model = xy
+                    self.model = XY()
 
             elif event == 'Algorithm':
                 if self.simulation_running:
@@ -270,11 +236,11 @@ class App:
                 self.popup = True
 
                 if values['Algorithm'] == 'Heat bath':
-                    self.algorithm = heatbath
+                    self.algorithm = Heatbath()
                 elif values['Algorithm'] == 'Wolff':
-                    self.algorithm = wolff
+                    self.algorithm = Wolff()
                 else:
-                    self.algorithm = metropolis
+                    self.algorithm = Metropolis()
 
             elif event == 'BC':
                 if self.simulation_running:
@@ -284,11 +250,11 @@ class App:
                 self.popup = True
 
                 if values['BC'] == 'Empty':
-                    self.bc = empty
+                    self.bc = Empty()
                 elif values['BC'] == 'Periodic':
-                    self.bc = periodic
+                    self.bc = Periodic()
                 else:
-                    self.bc = fixed
+                    self.bc = Fixed()
 
             elif event == 'plot':
                 self.popup = True
@@ -328,7 +294,7 @@ class App:
                         print('Stop!')
                         self.simulation_running = False
                         self.thread.join()
-                        if self.model == xy:
+                        if self.model.quiver:
                             plt.quiver(np.cos(self.array), np.sin(self.array))
                             plt.show()
 
@@ -343,20 +309,6 @@ class App:
         self.window.close()
         self.thread.join()
 
-    ##############################################################################################
-
-    ##############################################################################################
-    # This part makes a random grid as your initial lattice
-    ##############################################################################################
-    def init_grid(self):
-        possible_spins = self.model.get_possible_spins(self.Npotts)
-        actual_dimension = self.shape.get_dimensions(self.gridsize)
-        init_array = []
-        for y in range(actual_dimension[0]):
-            init_array.append(random.choices(possible_spins, k=actual_dimension[1]))
-        return np.array(init_array)
-
-    ##############################################################################################
 
 
 if __name__ == '__main__':
