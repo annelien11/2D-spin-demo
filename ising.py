@@ -3,8 +3,6 @@ from model import Model
 
 
 class Ising(Model):
-    def __init__(self):
-        self.quiver = False
 
     def energy_calculator(self, J, h, spin, nbs):
         energy = -J * spin * np.sum(nbs) - h * spin

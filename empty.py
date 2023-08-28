@@ -8,3 +8,9 @@ class Empty(Boundary_conditions):
             if pos[0] != -1 and pos[0] != dimensions[0] and pos[1] != -1 and pos[1] != dimensions[1]:
                 nbs.append(spinlattice[pos[0],pos[1]])
         return nbs
+
+    def get_actual_position(self, position, dimensions):
+        if position[0] != -1 and position[0] != dimensions[0] and position[1] != -1 and position[1] != dimensions[1]:
+            return (True,position)
+        else:
+            return (False,position)

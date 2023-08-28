@@ -1,5 +1,9 @@
 
 class Model():
+    @property
+    def show_arrows(self):
+        return False
+
     def energy_calculator(self, J, h, spin, nbs):
         pass
 

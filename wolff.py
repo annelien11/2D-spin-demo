@@ -2,7 +2,7 @@ import numpy as np
 from algorithm import Algorithm
 
 class Wolff(Algorithm):
-    def spinflip(self, J, spinlattice, spinposition, new_spin, dimensions, compute_energies, temperature, find_nb_positions, get_neighbors):
+    def spinflip(self, J, spinlattice, spinposition, new_spin, dimensions, compute_energies, temperature, find_nb_positions, get_neighbors, get_actual_position):
         prob = 1 - np.exp(-2 * J / temperature)
         new_array = spinlattice
         spin_value = spinlattice[spinposition[0], spinposition[1]]
@@ -17,10 +17,11 @@ class Wolff(Algorithm):
             nb_positions = find_nb_positions(target)
             for nb_pos in nb_positions:
                 nb = get_neighbors(spinlattice, [nb_pos], dimensions)
-                if nb == spin_value:
+                actual_pos = get_actual_position(nb_pos, dimensions)
+                if nb[0] == spin_value and actual_pos[0]:
                     test = np.random.rand()
                     if test <= prob:
-                        spins_to_flip.append(nb_pos)
+                        spins_to_flip.append(actual_pos[1])
         #     flip the spin and remove it from the list (remove all the copies of this position to eliminate doubles)
             newlist = []
             for i in range(len(spins_to_flip)):

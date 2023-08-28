@@ -4,8 +4,6 @@ from model import Model
 
 
 class Potts(Model):
-    def __init__(self):
-        self.quiver = False
 
     def energy_calculator(self, J, h, spin, nbs):
         energy = 0

@@ -160,7 +160,7 @@ class App:
 
             new_spin = self.model.get_new_spin(self.array[targetpos[0],targetpos[1]],self.Npotts)
 
-            (self.array, deltaE) = self.algorithm.spinflip(J, self.array, targetpos, new_spin, self.shape.get_dimensions(self.gridsize), self.compute_energies, temperature, self.shape.find_nb_positions, self.bc.get_neighbors)
+            (self.array, deltaE) = self.algorithm.spinflip(J, self.array, targetpos, new_spin, self.shape.get_dimensions(self.gridsize), self.compute_energies, temperature, self.shape.find_nb_positions, self.bc.get_neighbors, self.bc.get_actual_position)
 
             if self.plot:
                 current_energy = self.en[-1]
@@ -294,7 +294,7 @@ class App:
                         print('Stop!')
                         self.simulation_running = False
                         self.thread.join()
-                        if self.model.quiver:
+                        if self.model.show_arrows:
                             plt.quiver(np.cos(self.array), np.sin(self.array))
                             plt.show()
 

@@ -3,8 +3,10 @@ from model import Model
 
 
 class XY(Model):
-    def __init__(self):
-        self.quiver = True
+
+    @property
+    def show_arrows(self):
+        return True
 
     def energy_calculator(self, J, h, spin, nbs):
         energy = -h * np.cos(spin)

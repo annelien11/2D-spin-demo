@@ -8,7 +8,7 @@ class Metropolis(Algorithm):
         return boltzmann
 
 
-    def spinflip(self, J, spinlattice, spinposition, new_spin, dimensions, compute_energies, temperature, find_nb_positions, get_neighbors):
+    def spinflip(self, J, spinlattice, spinposition, new_spin, dimensions, compute_energies, temperature, find_nb_positions, get_neighbors, get_actual_position):
         energies = compute_energies(spinposition, new_spin)
         new_array = spinlattice
         deltaE = 0
