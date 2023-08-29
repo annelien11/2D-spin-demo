@@ -1,5 +1,5 @@
 import numpy as np
-from shape import Shape
+from shapes.shape import Shape
 
 class Triangle(Shape):
     def __init__(self):
